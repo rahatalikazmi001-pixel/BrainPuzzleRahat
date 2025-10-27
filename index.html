@@ -1,129 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Brain Puzzle Rahat</title>
-    <style>
-        body {
-            margin: 0;
-            background: #111;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        #game-container {
-            width: 960px;
-            height: 540px;
-            margin: 50px auto;
-            background: #222;
-            border: 3px solid #fff;
-            position: relative;
-        }
-        #logo { font-size: 36px; margin-top: 50px; }
-        #loading { font-size: 24px; margin-top: 20px; }
-        #menu, #about, #game { display: none; }
-        button { font-size: 20px; padding: 10px 20px; margin: 10px; cursor: pointer; }
-    </style>
+<meta charset="UTF-8">
+<title>Brain Puzzle Rahat</title>
+<style>
+body { margin:0; background:#111; color:#fff; font-family:Arial; text-align:center; }
+#game-container { width:960px; height:540px; margin:50px auto; background:#222; border:3px solid #fff; position:relative; }
+#splash { font-size:36px; margin-top:50px; }
+#loading { font-size:24px; margin-top:20px; }
+#menu, #about, #game { display:none; }
+button { font-size:20px; padding:10px 20px; margin:10px; cursor:pointer; }
+</style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="splash">
-            <div id="logo">Brain Puzzle Rahat</div>
-            <div id="loading">Loading... 0%</div>
-        </div>
+<div id="game-container">
+  <div id="splash">
+    <div>Brain Puzzle Rahat</div>
+    <div id="loading">Loading... 0%</div>
+  </div>
 
-        <div id="menu">
-            <h2>Main Menu</h2>
-            <button onclick="startGame()">Start Game</button>
-            <button onclick="showAbout()">About</button>
-            <p>Coins: <span id="coins-menu">0</span></p>
-        </div>
+  <div id="menu">
+    <h2>Main Menu</h2>
+    <button onclick="startGame()">Start Game</button>
+    <button onclick="showAbout()">About</button>
+    <p>Coins: <span id="coins-menu">0</span></p>
+  </div>
 
-        <div id="game">
-            <h2 id="level-title">Level 1</h2>
-            <p>Coins: <span id="coins-game">0</span></p>
-            <button onclick="winLevel()">Win Level</button>
-            <button onclick="backMenuFromGame()">Back to Menu</button>
-        </div>
+  <div id="game">
+    <h2 id="level-title">Level 1</h2>
+    <p>Coins: <span id="coins-game">0</span></p>
+    <div id="puzzle-container"></div>
+    <button onclick="nextLevel()">Submit Answer</button>
+    <button onclick="backMenuFromGame()">Back to Menu</button>
+  </div>
 
-        <div id="about">
-            <h3>About</h3>
-            <p>THIS GAME CREATED BY RAHAT IN 2025</p>
-            <p>MADE IN PAKISTAN</p>
-            <button onclick="backMenu()">Back</button>
-        </div>
-    </div>
+  <div id="about">
+    <h3>About</h3>
+    <p>THIS GAME CREATED BY RAHAT IN 2025</p>
+    <p>MADE IN PAKISTAN</p>
+    <button onclick="backMenu()">Back</button>
+  </div>
+</div>
 
-    <script>
-        let coins = parseInt(localStorage.getItem('coins')) || 0;
-        let currentLevel = parseInt(localStorage.getItem('level')) || 1;
-        const maxLevels = 1000;
+<script>
+let coins = parseInt(localStorage.getItem('coins')) || 0;
+let currentLevel = parseInt(localStorage.getItem('level')) || 1;
+const maxLevels = 10;
 
-        const splash = document.getElementById('splash');
-        const loadingText = document.getElementById('loading');
-        const menu = document.getElementById('menu');
-        const game = document.getElementById('game');
-        const about = document.getElementById('about');
-        const coinsTextGame = document.getElementById('coins-game');
-        const coinsTextMenu = document.getElementById('coins-menu');
-        const levelTitle = document.getElementById('level-title');
+const splash = document.getElementById('splash');
+const loadingText = document.getElementById('loading');
+const menu = document.getElementById('menu');
+const game = document.getElementById('game');
+const about = document.getElementById('about');
+const coinsTextGame = document.getElementById('coins-game');
+const coinsTextMenu = document.getElementById('coins-menu');
+const levelTitle = document.getElementById('level-title');
+const puzzleContainer = document.getElementById('puzzle-container');
 
-        function updateCoins() {
-            coinsTextGame.innerText = coins;
-            coinsTextMenu.innerText = coins;
-            localStorage.setItem('coins', coins);
-        }
+// Splash
+let loading = 0;
+let loadInterval = setInterval(() => {
+  loading += 2;
+  if(loading>100) loading=100;
+  loadingText.innerText="Loading... "+loading+"%";
+  if(loading>=100){
+    clearInterval(loadInterval);
+    splash.style.display="none";
+    menu.style.display="block";
+    updateCoins();
+  }
+},60);
 
-        function updateLevel() {
-            levelTitle.innerText = "Level " + currentLevel;
-            localStorage.setItem('level', currentLevel);
-        }
+function updateCoins(){
+  coinsTextGame.innerText=coins;
+  coinsTextMenu.innerText=coins;
+  localStorage.setItem('coins',coins);
+}
 
-        // Splash screen loading
-        let loading = 0;
-        let loadInterval = setInterval(() => {
-            loading += 2;
-            if(loading > 100) loading = 100;
-            loadingText.innerText = "Loading... " + loading + "%";
-            if(loading >= 100){
-                clearInterval(loadInterval);
-                splash.style.display = "none";
-                menu.style.display = "block";
-                updateCoins();
-            }
-        }, 60);
+function updateLevel(){
+  levelTitle.innerText="Level "+currentLevel;
+  localStorage.setItem('level',currentLevel);
+  showPuzzle(currentLevel);
+}
 
-        function startGame(){
-            menu.style.display = "none";
-            game.style.display = "block";
-            updateCoins();
-            updateLevel();
-        }
+function startGame(){ menu.style.display="none"; game.style.display="block"; updateCoins(); updateLevel(); }
+function showAbout(){ menu.style.display="none"; about.style.display="block"; }
+function backMenu(){ about.style.display="none"; menu.style.display="block"; updateCoins(); }
+function backMenuFromGame(){ game.style.display="none"; menu.style.display="block"; updateCoins(); }
 
-        function showAbout(){
-            menu.style.display = "none";
-            about.style.display = "block";
-        }
+// Puzzle logic (example Brain Test style)
+const puzzles = [
+  {question:"Click the larger circle", options:["small","large"], answer:"large"},
+  {question:"Tap the red square", options:["red","blue"], answer:"red"},
+  {question:"Drag the circle to the square", options:["circle","square"], answer:"circle"},
+  {question:"Which is heavier?", options:["feather","rock"], answer:"rock"},
+  {question:"Find hidden button", options:["button1","button2"], answer:"button1"},
+  {question:"Count the number of stars: 3", options:["2","3"], answer:"3"},
+  {question:"Swipe left to continue", options:["left","right"], answer:"left"},
+  {question:"Tap the animal", options:["cat","dog"], answer:"cat"},
+  {question:"Fill the empty box", options:["A","B"], answer:"A"},
+  {question:"Press the circle twice", options:["once","twice"], answer:"twice"}
+];
 
-        function backMenu(){
-            about.style.display = "none";
-            menu.style.display = "block";
-            updateCoins();
-        }
+function showPuzzle(level){
+  puzzleContainer.innerHTML="";
+  const p = puzzles[(level-1)%puzzles.length];
+  const q = document.createElement('p');
+  q.innerText=p.question;
+  puzzleContainer.appendChild(q);
+  p.options.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.innerText=opt;
+    btn.onclick=()=>{ if(opt==p.answer){coins+=1000;currentLevel++; updateCoins(); updateLevel(); alert("Correct! +1000 Coins"); } else{alert("Wrong! Try again");} }
+    puzzleContainer.appendChild(btn);
+  });
+}
 
-        function backMenuFromGame(){
-            game.style.display = "none";
-            menu.style.display = "block";
-            updateCoins();
-        }
-
-        function winLevel(){
-            coins += 1000;
-            if(currentLevel < maxLevels) currentLevel++;
-            updateCoins();
-            updateLevel();
-            alert("Level Completed! +1000 Coins\nNext Level: " + currentLevel);
-        }
-    </script>
+function nextLevel(){
+  updateLevel();
+}
+</script>
 </body>
 </html>
