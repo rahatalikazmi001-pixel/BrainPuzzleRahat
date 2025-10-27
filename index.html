@@ -3,81 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <title>Brain Puzzle Rahat</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-html, body {
-  margin:0;
-  padding:0;
-  font-family:'Comic Sans MS', Arial, sans-serif;
-  text-align:center;
-  background:#f0f8ff; /* light colorful background */
-}
-#game-container {
-  width:100%;
-  max-width:480px;
-  margin:0 auto;
-  padding:10px;
-  box-sizing:border-box;
-}
-#logo {
-  font-size:36px;
-  font-weight:bold;
-  color:#ff6f61;
-  text-shadow:2px 2px 5px #aaa;
-  margin-top:20px;
-}
-#loading { font-size:20px; margin-top:20px; color:#333; }
+body { margin:0; background:#111; color:#fff; font-family:Arial; text-align:center; }
+#game-container { width:960px; height:540px; margin:50px auto; background:#222; border:3px solid #fff; position:relative; border-radius:15px;}
+#splash { font-size:36px; margin-top:50px; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;}
+#loading { font-size:24px; margin-top:20px; }
 #menu, #about, #game { display:none; }
-button {
-  background:#ffcc00;
-  color:#000;
-  border:none;
-  border-radius:10px;
-  padding:10px 20px;
-  font-size:16px;
-  cursor:pointer;
-  margin:10px;
-  transition:0.2s;
-}
-button:hover {
-  background:#ff8c00;
-  color:#fff;
-}
-#puzzle-container {
-  margin-top:20px;
-  background:#fff;
-  border:2px solid #333;
-  padding:15px;
-  border-radius:10px;
-  min-height:150px;
-}
-.interactive-object {
-  display:inline-block;
-  width:50px;
-  height:50px;
-  margin:10px;
-  border-radius:50%;
-  cursor:pointer;
-  transition:0.3s;
-  box-shadow: 2px 2px 5px #888;
-}
-.interactive-object:hover { transform:scale(1.2); }
+button { font-size:20px; padding:10px 20px; margin:10px; cursor:pointer; border-radius:10px; border:none; background:#ffcc00; color:#111; font-weight:bold; }
+#coins-menu { font-weight:bold; }
+.logo-container { display:flex; justify-content:center; align-items:center; gap:15px; margin-bottom:30px;}
+.logo-container span { font-size:48px; }
 </style>
 </head>
 <body>
 <div id="game-container">
+  <!-- Splash Screen -->
   <div id="splash">
-    <div id="logo">Brain Puzzle Rahat</div>
+    <div class="logo-container">
+      <span>🧠</span>
+      <span>Brain Puzzle Rahat</span>
+      <span>💡</span>
+    </div>
     <div id="loading">Loading... 0%</div>
   </div>
 
+  <!-- Main Menu -->
   <div id="menu">
+    <div class="logo-container">
+      <span>🧠</span>
+      <span>Brain Puzzle Rahat</span>
+      <span>💡</span>
+    </div>
     <h2>Main Menu</h2>
     <button onclick="startGame()">Start Game</button>
     <button onclick="showAbout()">About</button>
     <p>Coins: <span id="coins-menu">0</span></p>
   </div>
 
+  <!-- Game Screen -->
   <div id="game">
     <h2 id="level-title">Level 1</h2>
     <p>Coins: <span id="coins-game">0</span></p>
@@ -86,6 +49,7 @@ button:hover {
     <button onclick="backMenuFromGame()">Back to Menu</button>
   </div>
 
+  <!-- About Screen -->
   <div id="about">
     <h3>About</h3>
     <p>THIS GAME CREATED BY RAHAT IN 2025</p>
@@ -97,7 +61,7 @@ button:hover {
 <script>
 let coins = parseInt(localStorage.getItem('coins')) || 0;
 let currentLevel = parseInt(localStorage.getItem('level')) || 1;
-const maxLevels = 10;
+const maxLevels = 100;
 
 const splash = document.getElementById('splash');
 const loadingText = document.getElementById('loading');
@@ -112,7 +76,7 @@ const puzzleContainer = document.getElementById('puzzle-container');
 // Splash loading
 let loading = 0;
 let loadInterval = setInterval(() => {
-  loading += 3;
+  loading += 2;
   if(loading>100) loading=100;
   loadingText.innerText="Loading... "+loading+"%";
   if(loading>=100){
@@ -121,7 +85,7 @@ let loadInterval = setInterval(() => {
     menu.style.display="block";
     updateCoins();
   }
-},50);
+},60);
 
 function updateCoins(){
   coinsTextGame.innerText=coins;
@@ -140,38 +104,35 @@ function showAbout(){ menu.style.display="none"; about.style.display="block"; }
 function backMenu(){ about.style.display="none"; menu.style.display="block"; updateCoins(); }
 function backMenuFromGame(){ game.style.display="none"; menu.style.display="block"; updateCoins(); }
 
-// Puzzles with colorful interactive objects
+// Brain Test style puzzles
 const puzzles = [
-  {question:"Click the larger circle", objects:[{color:"#ff4d4d",size:40,correct:false},{color:"#4dff4d",size:60,correct:true}]},
-  {question:"Tap the red square", objects:[{color:"#ff4d4d",size:50,correct:true},{color:"#4d4dff",size:50,correct:false}]},
-  {question:"Click the biggest circle", objects:[{color:"#ffff4d",size:30,correct:false},{color:"#ffb84d",size:70,correct:true}]},
-  {question:"Tap the blue object", objects:[{color:"#4dffff",size:50,correct:true},{color:"#ff4dff",size:50,correct:false}]}
+  {q:"Select the red color", opts:["red","black"], ans:"red"},
+  {q:"Select the black color", opts:["red","black"], ans:"black"},
+  {q:"Click the larger circle", opts:["small","large"], ans:"large"},
+  {q:"Click the smaller circle", opts:["small","large"], ans:"small"},
+  {q:"Tap the cat", opts:["cat","dog"], ans:"cat"},
+  {q:"Tap the dog", opts:["cat","dog"], ans:"dog"},
+  {q:"Press the hidden button", opts:["button1","button2"], ans:"button1"},
+  {q:"Swipe left to continue", opts:["left","right"], ans:"left"},
+  {q:"Swipe right to continue", opts:["left","right"], ans:"right"},
+  {q:"Which is heavier?", opts:["rock","feather"], ans:"rock"},
+  // Add more 90+ unique puzzles
 ];
 
 function showPuzzle(level){
   puzzleContainer.innerHTML="";
   const p = puzzles[(level-1)%puzzles.length];
   const q = document.createElement('p');
-  q.innerText=p.question;
+  q.innerText=p.q;
   puzzleContainer.appendChild(q);
-  p.objects.forEach(obj=>{
-    const div=document.createElement('div');
-    div.className='interactive-object';
-    div.style.background=obj.color;
-    div.style.width=obj.size+'px';
-    div.style.height=obj.size+'px';
-    div.onclick=()=>{
-      if(obj.correct){
-        coins+=1000;
-        currentLevel++;
-        updateCoins();
-        updateLevel();
-        alert("Correct! +1000 Coins");
-      } else{
-        alert("Wrong! Try Again");
-      }
-    };
-    puzzleContainer.appendChild(div);
+  p.opts.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.innerText=opt;
+    btn.onclick=()=>{ 
+      if(opt==p.ans){coins+=1000;currentLevel++; updateCoins(); updateLevel(); alert("Correct! +1000 Coins");} 
+      else{alert("Wrong! Try again");} 
+    }
+    puzzleContainer.appendChild(btn);
   });
 }
 
@@ -180,4 +141,4 @@ function nextLevel(){
 }
 </script>
 </body>
-  </html>
+        </html>
