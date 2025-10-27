@@ -3,21 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <title>Brain Puzzle Rahat</title>
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
 <style>
-/* Mobile portrait style */
 body { margin:0; background:#fff; color:#111; font-family:Arial; text-align:center; }
-#game-container { width:400px; height:750px; margin:10px auto; background:#f5f5f5; border:2px solid #111; position:relative; border-radius:20px; overflow:hidden; box-shadow:0 0 15px rgba(0,0,0,0.3);}
+#game-container { width:90%; max-width:400px; margin:10px auto; background:#f5f5f5; border:2px solid #111; position:relative; border-radius:20px; overflow:hidden; box-shadow:0 0 15px rgba(0,0,0,0.3);}
 #splash, #menu, #about, #game { display:none; width:100%; height:100%; }
 #splash { display:flex; flex-direction:column; align-items:center; justify-content:center; }
 #loading { font-size:20px; margin-top:20px; }
 button { font-size:18px; padding:10px 15px; margin:8px; cursor:pointer; border-radius:10px; border:none; background:#ffcc00; color:#111; font-weight:bold; width:60%; }
 .logo-container { display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:20px; font-size:28px; }
-#puzzle-container { position:relative; width:100%; height:500px; margin-top:10px; border:1px solid #ccc; border-radius:10px; background:#e0e0e0; overflow:hidden;}
-.object { position:absolute; font-size:32px; cursor:pointer; user-select:none; }
+#question { font-size:22px; margin:20px 0; font-weight:bold; }
+#options-container { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
+.option { font-size:32px; cursor:pointer; padding:10px; border-radius:10px; border:2px solid #111; background:#e0e0e0; user-select:none; width:60px; height:60px; display:flex; justify-content:center; align-items:center; }
+.option.correct { background:#8f8; border-color:#4a4; }
+.option.wrong { background:#f88; border-color:#a44; }
 </style>
 </head>
 <body>
 <div id="game-container">
+
   <!-- Splash Screen -->
   <div id="splash">
     <div class="logo-container">
@@ -44,8 +48,9 @@ button { font-size:18px; padding:10px 15px; margin:8px; cursor:pointer; border-r
   <div id="game">
     <h2 id="level-title">Level 1</h2>
     <p>Coins: <span id="coins-game">0</span></p>
-    <div id="puzzle-container"></div>
-    <button onclick="nextLevel()">Submit Answer</button>
+    <div id="question">Question will appear here</div>
+    <div id="options-container"></div>
+    <button onclick="nextLevel()">Next Level</button>
     <button onclick="backMenuFromGame()">Back to Menu</button>
   </div>
 
@@ -61,6 +66,7 @@ button { font-size:18px; padding:10px 15px; margin:8px; cursor:pointer; border-r
 <script>
 let coins = parseInt(localStorage.getItem('coins')) || 0;
 let currentLevel = parseInt(localStorage.getItem('level')) || 1;
+let completedLevels = JSON.parse(localStorage.getItem('completedLevels')) || [];
 
 // Elements
 const splash = document.getElementById('splash');
@@ -71,7 +77,8 @@ const about = document.getElementById('about');
 const coinsTextGame = document.getElementById('coins-game');
 const coinsTextMenu = document.getElementById('coins-menu');
 const levelTitle = document.getElementById('level-title');
-const puzzleContainer = document.getElementById('puzzle-container');
+const questionEl = document.getElementById('question');
+const optionsContainer = document.getElementById('options-container');
 
 // Splash Loading
 let loading = 0;
@@ -104,37 +111,47 @@ function showAbout(){ menu.style.display="none"; about.style.display="block"; }
 function backMenu(){ about.style.display="none"; menu.style.display="block"; updateCoins(); }
 function backMenuFromGame(){ game.style.display="none"; menu.style.display="block"; updateCoins(); }
 
-// Objects list
-const objectsList = ["🎄","🚗","🐈","🐕","🧍‍♂️","🏠","🍖","🛠️","🌳","🌷"];
+// Quiz Data (question, options, correct)
+const quizData = [
+  {question:"Click the tree", options:["🎄","🚗","🐈","🏠"], answer:"🎄"},
+  {question:"Click the car", options:["🎄","🚗","🐈","🏠"], answer:"🚗"},
+  {question:"Click the dog", options:["🐕","🐈","🍖","🛠️"], answer:"🐕"},
+  {question:"Click the cat", options:["🐈","🐕","🌳","🌷"], answer:"🐈"},
+  {question:"Click the house", options:["🏠","🧍‍♂️","🌳","🍖"], answer:"🏠"}
+];
 
-// Generate objects for level
+// Show puzzle / quiz
 function showPuzzle(level){
-  puzzleContainer.innerHTML="";
-  const usedIndexes = new Set();
-  const totalObjects = 5 + Math.floor(Math.random()*3); // 5-7 objects
-  for(let i=0;i<totalObjects;i++){
-    let idx;
-    do { idx = Math.floor(Math.random()*objectsList.length); } while(usedIndexes.has(idx));
-    usedIndexes.add(idx);
-    const obj = document.createElement('div');
-    obj.classList.add('object');
-    obj.innerText = objectsList[idx];
-    obj.style.top = (50 + Math.random()*400) + "px";
-    obj.style.left = (20 + Math.random()*300) + "px";
-    obj.onclick = ()=>{ 
-      coins+=1000; 
-      currentLevel++; 
-      updateCoins(); 
-      updateLevel(); 
-      alert("Correct! +1000 Coins"); 
+  // prevent repeated level
+  if(completedLevels.includes(level)) return;
+  const data = quizData[(level-1)%quizData.length];
+  questionEl.innerText = data.question;
+  optionsContainer.innerHTML = "";
+  data.options.forEach(opt=>{
+    const div = document.createElement('div');
+    div.classList.add('option');
+    div.innerText = opt;
+    div.onclick = ()=>{
+      if(div.innerText === data.answer){
+        div.classList.add('correct');
+        coins += 1000;
+        alert("Correct! +1000 Coins");
+      } else {
+        div.classList.add('wrong');
+        alert("Wrong!");
+      }
+      completedLevels.push(level);
+      localStorage.setItem('completedLevels', JSON.stringify(completedLevels));
+      updateCoins();
     }
-    puzzleContainer.appendChild(obj);
-  }
+    optionsContainer.appendChild(div);
+  });
 }
 
 function nextLevel(){
+  currentLevel++;
   updateLevel();
 }
 </script>
 </body>
-</html>
+      </html>
