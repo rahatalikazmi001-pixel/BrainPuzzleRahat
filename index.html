@@ -4,15 +4,16 @@
 <meta charset="UTF-8">
 <title>Brain Puzzle Rahat</title>
 <style>
-/* Mobile screen style */
+/* Mobile portrait style */
 body { margin:0; background:#fff; color:#111; font-family:Arial; text-align:center; }
-#game-container { width:375px; height:667px; margin:20px auto; background:#f5f5f5; border:2px solid #111; position:relative; border-radius:20px; overflow:hidden; box-shadow:0 0 15px rgba(0,0,0,0.3);}
+#game-container { width:400px; height:750px; margin:10px auto; background:#f5f5f5; border:2px solid #111; position:relative; border-radius:20px; overflow:hidden; box-shadow:0 0 15px rgba(0,0,0,0.3);}
 #splash, #menu, #about, #game { display:none; width:100%; height:100%; }
 #splash { display:flex; flex-direction:column; align-items:center; justify-content:center; }
 #loading { font-size:20px; margin-top:20px; }
 button { font-size:18px; padding:10px 15px; margin:8px; cursor:pointer; border-radius:10px; border:none; background:#ffcc00; color:#111; font-weight:bold; width:60%; }
 .logo-container { display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:20px; font-size:28px; }
-#puzzle-container { margin-top:20px; }
+#puzzle-container { position:relative; width:100%; height:500px; margin-top:10px; border:1px solid #ccc; border-radius:10px; background:#e0e0e0; overflow:hidden;}
+.object { position:absolute; font-size:32px; cursor:pointer; user-select:none; }
 </style>
 </head>
 <body>
@@ -103,36 +104,32 @@ function showAbout(){ menu.style.display="none"; about.style.display="block"; }
 function backMenu(){ about.style.display="none"; menu.style.display="block"; updateCoins(); }
 function backMenuFromGame(){ game.style.display="none"; menu.style.display="block"; updateCoins(); }
 
-// Tricky Brain Test style puzzles (100+ unique puzzles can be added)
-const puzzles = [
-  {q:"Select the red color", opts:["red","black"], ans:"red"},
-  {q:"Select the black color", opts:["red","black"], ans:"black"},
-  {q:"Click the larger circle", opts:["small","large"], ans:"large"},
-  {q:"Click the smaller circle", opts:["small","large"], ans:"small"},
-  {q:"Tap the cat", opts:["cat","dog"], ans:"cat"},
-  {q:"Tap the dog", opts:["cat","dog"], ans:"dog"},
-  {q:"Press the hidden button", opts:["button1","button2"], ans:"button1"},
-  {q:"Swipe left to continue", opts:["left","right"], ans:"left"},
-  {q:"Swipe right to continue", opts:["left","right"], ans:"right"},
-  {q:"Which is heavier?", opts:["rock","feather"], ans:"rock"}
-  // Add more unique puzzles for full 100+ levels
-];
+// Objects list
+const objectsList = ["🎄","🚗","🐈","🐕","🧍‍♂️","🏠","🍖","🛠️","🌳","🌷"];
 
+// Generate objects for level
 function showPuzzle(level){
   puzzleContainer.innerHTML="";
-  const p = puzzles[(level-1)%puzzles.length];
-  const q = document.createElement('p');
-  q.innerText=p.q;
-  puzzleContainer.appendChild(q);
-  p.opts.forEach(opt=>{
-    const btn=document.createElement('button');
-    btn.innerText=opt;
-    btn.onclick=()=>{ 
-      if(opt==p.ans){coins+=1000;currentLevel++; updateCoins(); updateLevel(); alert("Correct! +1000 Coins");} 
-      else{alert("Wrong! Try again");} 
+  const usedIndexes = new Set();
+  const totalObjects = 5 + Math.floor(Math.random()*3); // 5-7 objects
+  for(let i=0;i<totalObjects;i++){
+    let idx;
+    do { idx = Math.floor(Math.random()*objectsList.length); } while(usedIndexes.has(idx));
+    usedIndexes.add(idx);
+    const obj = document.createElement('div');
+    obj.classList.add('object');
+    obj.innerText = objectsList[idx];
+    obj.style.top = (50 + Math.random()*400) + "px";
+    obj.style.left = (20 + Math.random()*300) + "px";
+    obj.onclick = ()=>{ 
+      coins+=1000; 
+      currentLevel++; 
+      updateCoins(); 
+      updateLevel(); 
+      alert("Correct! +1000 Coins"); 
     }
-    puzzleContainer.appendChild(btn);
-  });
+    puzzleContainer.appendChild(obj);
+  }
 }
 
 function nextLevel(){
@@ -140,4 +137,4 @@ function nextLevel(){
 }
 </script>
 </body>
-      </html>
+</html>
