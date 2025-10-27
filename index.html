@@ -3,58 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <title>Brain Puzzle Rahat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body {
+html, body {
   margin:0;
-  background: linear-gradient(to bottom, #1a1a1a, #333);
-  color:#fff;
-  font-family: 'Comic Sans MS', Arial, sans-serif;
+  padding:0;
+  font-family:'Comic Sans MS', Arial, sans-serif;
   text-align:center;
+  background:#f0f8ff; /* light colorful background */
 }
 #game-container {
-  width:960px;
-  height:540px;
-  margin:50px auto;
-  background:#222;
-  border:3px solid #fff;
-  border-radius:15px;
-  box-shadow:0 0 20px #000;
-  position:relative;
-  padding:20px;
+  width:100%;
+  max-width:480px;
+  margin:0 auto;
+  padding:10px;
+  box-sizing:border-box;
 }
 #logo {
-  font-size:48px;
+  font-size:36px;
   font-weight:bold;
-  color:#ffcc00;
-  text-shadow:2px 2px 5px #000;
-}
-#loading {
-  font-size:24px;
+  color:#ff6f61;
+  text-shadow:2px 2px 5px #aaa;
   margin-top:20px;
 }
+#loading { font-size:20px; margin-top:20px; color:#333; }
 #menu, #about, #game { display:none; }
 button {
-  background:#444;
-  color:#fff;
-  border:2px solid #fff;
+  background:#ffcc00;
+  color:#000;
+  border:none;
   border-radius:10px;
   padding:10px 20px;
-  font-size:18px;
+  font-size:16px;
   cursor:pointer;
   margin:10px;
   transition:0.2s;
 }
 button:hover {
-  background:#fff;
-  color:#000;
+  background:#ff8c00;
+  color:#fff;
 }
 #puzzle-container {
   margin-top:20px;
-  background:#333;
-  border:2px solid #fff;
-  padding:20px;
-  border-radius:15px;
+  background:#fff;
+  border:2px solid #333;
+  padding:15px;
+  border-radius:10px;
+  min-height:150px;
 }
+.interactive-object {
+  display:inline-block;
+  width:50px;
+  height:50px;
+  margin:10px;
+  border-radius:50%;
+  cursor:pointer;
+  transition:0.3s;
+  box-shadow: 2px 2px 5px #888;
+}
+.interactive-object:hover { transform:scale(1.2); }
 </style>
 </head>
 <body>
@@ -105,7 +112,7 @@ const puzzleContainer = document.getElementById('puzzle-container');
 // Splash loading
 let loading = 0;
 let loadInterval = setInterval(() => {
-  loading += 2;
+  loading += 3;
   if(loading>100) loading=100;
   loadingText.innerText="Loading... "+loading+"%";
   if(loading>=100){
@@ -114,7 +121,7 @@ let loadInterval = setInterval(() => {
     menu.style.display="block";
     updateCoins();
   }
-},60);
+},50);
 
 function updateCoins(){
   coinsTextGame.innerText=coins;
@@ -133,18 +140,12 @@ function showAbout(){ menu.style.display="none"; about.style.display="block"; }
 function backMenu(){ about.style.display="none"; menu.style.display="block"; updateCoins(); }
 function backMenuFromGame(){ game.style.display="none"; menu.style.display="block"; updateCoins(); }
 
-// Brain Test style puzzles
+// Puzzles with colorful interactive objects
 const puzzles = [
-  {question:"Click the larger circle", options:["small","large"], answer:"large"},
-  {question:"Tap the red square", options:["red","blue"], answer:"red"},
-  {question:"Drag the circle to the square", options:["circle","square"], answer:"circle"},
-  {question:"Which is heavier?", options:["feather","rock"], answer:"rock"},
-  {question:"Find hidden button", options:["button1","button2"], answer:"button1"},
-  {question:"Count the number of stars: 3", options:["2","3"], answer:"3"},
-  {question:"Swipe left to continue", options:["left","right"], answer:"left"},
-  {question:"Tap the animal", options:["cat","dog"], answer:"cat"},
-  {question:"Fill the empty box", options:["A","B"], answer:"A"},
-  {question:"Press the circle twice", options:["once","twice"], answer:"twice"}
+  {question:"Click the larger circle", objects:[{color:"#ff4d4d",size:40,correct:false},{color:"#4dff4d",size:60,correct:true}]},
+  {question:"Tap the red square", objects:[{color:"#ff4d4d",size:50,correct:true},{color:"#4d4dff",size:50,correct:false}]},
+  {question:"Click the biggest circle", objects:[{color:"#ffff4d",size:30,correct:false},{color:"#ffb84d",size:70,correct:true}]},
+  {question:"Tap the blue object", objects:[{color:"#4dffff",size:50,correct:true},{color:"#ff4dff",size:50,correct:false}]}
 ];
 
 function showPuzzle(level){
@@ -153,21 +154,24 @@ function showPuzzle(level){
   const q = document.createElement('p');
   q.innerText=p.question;
   puzzleContainer.appendChild(q);
-  p.options.forEach(opt=>{
-    const btn=document.createElement('button');
-    btn.innerText=opt;
-    btn.onclick=()=>{
-      if(opt==p.answer){
+  p.objects.forEach(obj=>{
+    const div=document.createElement('div');
+    div.className='interactive-object';
+    div.style.background=obj.color;
+    div.style.width=obj.size+'px';
+    div.style.height=obj.size+'px';
+    div.onclick=()=>{
+      if(obj.correct){
         coins+=1000;
         currentLevel++;
         updateCoins();
         updateLevel();
         alert("Correct! +1000 Coins");
       } else{
-        alert("Wrong! Try again");
+        alert("Wrong! Try Again");
       }
     };
-    puzzleContainer.appendChild(btn);
+    puzzleContainer.appendChild(div);
   });
 }
 
@@ -176,4 +180,4 @@ function nextLevel(){
 }
 </script>
 </body>
-</html>
+  </html>
